@@ -3,18 +3,35 @@ import os
 
 class CSVStorage:
     def __init__(self, filename):
-        self.filename = filename
+        self.filename = filename 
         if not os.path.exists(self.filename):
             with open(self.filename, mode='w', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow(['ID', 'Date', 'Description', 'Amount'])
 
+    def _get_last_id(self):
+        """Get the last ID in the CSV file to auto-increment."""
+        try:
+            with open(self.filename, mode='r') as file:
+                reader = csv.reader(file)
+                rows = list(reader)
+                if len(rows) > 1:
+                    return int(rows[-1][0])
+        except Exception as e:
+            print(f"Error reading file: {e}")
+        return 0
+
     def add_record(self, record):
         """Add a new record to the CSV file."""
+        last_id = self._get_last_id()
+        new_id = last_id + 1
+
         with open(self.filename, mode='a', newline='') as file:
             writer = csv.writer(file)
+            record.insert(0, new_id)
             writer.writerow(record)
-        print(f"Record {record} added successfully.")
+        print(f"Record {record} added successfully with ID {new_id}.")
+
 
     def get_all_records(self):
         """Retrieve all records from the CSV file."""
